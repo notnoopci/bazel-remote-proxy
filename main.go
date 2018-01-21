@@ -23,6 +23,8 @@ type director interface {
 }
 
 func main() {
+	var err error
+
 	flag.Parse()
 
 	if *backend == "" {
@@ -30,8 +32,6 @@ func main() {
 		os.Exit(1)
 		return
 	}
-
-	session := session.New()
 
 	backendURL, err := url.Parse(*backend)
 	if err != nil {
@@ -41,11 +41,20 @@ func main() {
 	}
 
 	var d director
+
 	switch backendURL.Scheme {
 	case "s3":
-		d, _ = newS3Director(session, backendURL)
+		d, err = newS3Director(session.New(), backendURL)
+	case "circleci":
+		d, err = newCircleCIDirector(backendURL)
 	default:
-		fmt.Fprintf(os.Stderr, "only S3 is supported currently\n")
+		fmt.Fprintf(os.Stderr, "only S3 and circleci are supported currently\n")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error initializing backend: %v\n", err)
 		flag.Usage()
 		os.Exit(1)
 	}
