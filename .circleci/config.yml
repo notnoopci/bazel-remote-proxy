@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    docker:
+    - image: golang:1.9
+    working_directory: /go/src/github.com/notnoopci/bazel-remote-proxy
+    steps:
+    - checkout
+    - run: make test
+    - run: make binaries
+    - run: sha256sum $(find pkg -type f) | tee pkg/SHA256SUM
+    - store_artifacts:
+        path: pkg
+        destination: pkg
