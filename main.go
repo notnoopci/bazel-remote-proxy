@@ -24,6 +24,10 @@ type director interface {
 
 func main() {
 	var err error
+	logrus.WithFields(logrus.Fields{
+		"version":   Version,
+		"GitCommit": GitCommit,
+	}).Info("version info")
 
 	flag.Parse()
 
