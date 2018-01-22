@@ -37,7 +37,7 @@ A sample configuration would be:
           # otherwise download latest artifact
           DOWNLOAD_URL="$(curl -sSL \
              https://circleci.com/api/v1.1/project/github/notnoopci/bazel-remote-proxy/latest/artifacts?branch=master \
-             | grep -o -e 'https://[^"]*linux_amd64[^"]*' \
+             | grep -o -e "https://[^\"]*/bazel-remote-proxy-$(uname -s)_$(uname -m)" \
           )"
 
           mkdir -p ~/bin/

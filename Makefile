@@ -21,7 +21,7 @@ clean:
 test:
 	go test -tags "$(GO_TAGS)" ./...
 
-pkg/darwin_amd64/bazel-remote-proxy: $(GO_SOURCES)
+pkg/bazel-remote-proxy-Darwin_x86_64: $(GO_SOURCES)
 		@echo "==> Building $@ with tags $(GO_TAGS)..."
 		@CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 \
 				go build \
@@ -29,7 +29,7 @@ pkg/darwin_amd64/bazel-remote-proxy: $(GO_SOURCES)
 				-tags "$(GO_TAGS)" \
 				-o "$@"
 
-pkg/linux_amd64/bazel-remote-proxy: $(GO_SOURCES)
+pkg/bazel-remote-proxy-Linux_x86_64: $(GO_SOURCES)
 		@echo "==> Building $@ with tags $(GO_TAGS)..."
 		@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 				go build \
@@ -37,4 +37,4 @@ pkg/linux_amd64/bazel-remote-proxy: $(GO_SOURCES)
 				-tags "$(GO_TAGS)" \
 				-o "$@"
 
-binaries: pkg/linux_amd64/bazel-remote-proxy pkg/darwin_amd64/bazel-remote-proxy
+binaries: pkg/bazel-remote-proxy-Linux_x86_64 pkg/bazel-remote-proxy-Darwin_x86_64
