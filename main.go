@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	port    = flag.Int("port", 8080, "Port the HTTP server listens to")
+	port    = flag.Int("port", 7643, "Port the HTTP server listens to")
 	backend = flag.String("backend", "", "uri of backend storage service, e.g. s3://my-bazel-cache/prefix")
 )
 
