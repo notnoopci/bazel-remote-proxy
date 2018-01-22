@@ -7,14 +7,14 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"strconv"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/sirupsen/logrus"
 )
 
 var (
-	port    = flag.Int("port", 7643, "Port the HTTP server listens to")
+	bind    = flag.String("bind", "127.0.0.1:7643", "address and port to bind to")
 	backend = flag.String("backend", "", "uri of backend storage service, e.g. s3://my-bazel-cache/prefix")
 )
 
@@ -67,7 +67,10 @@ func main() {
 		Director: d.Direct,
 	}
 
-	addr := "127.0.0.1:" + strconv.Itoa(*port)
+	addr := *bind
+	if strings.HasPrefix(addr, ":") {
+		addr = "127.0.0.1" + addr
+	}
 	s := &http.Server{
 		Addr:    addr,
 		Handler: handler,

@@ -8,8 +8,8 @@ A remote cache for [Bazel](https://bazel.build) using HTTP/1.1 but that proxies 
 Usage of bazel-remote-proxy:
   -backend string
         uri of backend storage service, e.g. s3://my-bazel-cache/prefix
-  -port int
-        Port the HTTP server listens to (default 7643)
+  -bind string
+        address and port to bind to (default "127.0.0.1:7643")
 ```
 
 There are few supported storage backends:
@@ -40,14 +40,13 @@ A sample configuration would be:
              | grep -o -e "https://[^\"]*/bazel-remote-proxy-$(uname -s)_$(uname -m)" \
           )"
 
-          mkdir -p ~/bin/
-          curl -o ~/bin/bazel-remote-proxy "$DOWNLOAD_URL"
-          chmod +x ~/bin/bazel-remote-proxy
+          curl -o ~/bazel-remote-proxy "$DOWNLOAD_URL"
+          chmod +x ~/bazel-remote-proxy
 
     # step 2. start the proxy
     - run:
         name: setup bazel remote proxy
-        command: ~/bazel-remote-proxy -backend circleci:// -port 7654
+        command: ~/bazel-remote-proxy -backend circleci://
         background: true
 
     # step 3. configure bazel to use cache:
