@@ -20,20 +20,44 @@ type StorageConfig struct {
 	AWSRegion   string
 }
 
-type taskConfig struct {
+type dispatchedConfig struct {
 	TaskInfo struct {
 		Storage struct {
 			ProjectRoot string
 		}
 	}
+	AWSRegion string
+}
+
+type taskConfig struct {
+	// legacy taskconfig had dispatch config inlined
+	// so embedding it here
+	dispatchedConfig
+
+	// new taskConfig uses explicit Dispatched field
+	Dispatched dispatchedConfig
 
 	AuthenticationCerts struct {
 		CaCert     []byte
 		RunnerCert []byte
 		RunnerKey  []byte
 	}
+}
 
-	AWSRegion string
+func (c *taskConfig) projectRoot() string {
+	r := c.Dispatched.TaskInfo.Storage.ProjectRoot
+	if r == "" {
+		r = c.TaskInfo.Storage.ProjectRoot
+	}
+	return r
+}
+
+func (c *taskConfig) awsRegion() string {
+	r := c.Dispatched.AWSRegion
+	if r == "" {
+		r = c.AWSRegion
+	}
+	return r
 }
 
 // find the build agent service
@@ -56,13 +80,18 @@ func ReadCircleCIConfig() (*StorageConfig, error) {
 		return nil, fmt.Errorf("error opening config file: %v", err)
 	}
 
+	return parseCirclecIConfig(bytes)
+}
+
+func parseCirclecIConfig(bytes []byte) (*StorageConfig, error) {
 	taskConfig := taskConfig{}
-	err = json.Unmarshal(bytes, &taskConfig)
+	err := json.Unmarshal(bytes, &taskConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing config file: %v", err)
 	}
 
-	if !strings.HasPrefix(taskConfig.TaskInfo.Storage.ProjectRoot, "s3://") {
+	projectRoot := taskConfig.projectRoot()
+	if !strings.HasPrefix(projectRoot, "s3://") {
 		return nil, fmt.Errorf("only S3 storage backend is supported")
 	}
 
@@ -71,8 +100,7 @@ func ReadCircleCIConfig() (*StorageConfig, error) {
 		AuthCA:         taskConfig.AuthenticationCerts.CaCert,
 		AuthClientCert: taskConfig.AuthenticationCerts.RunnerCert,
 		AuthClientKey:  taskConfig.AuthenticationCerts.RunnerKey,
-		AWSRegion:      taskConfig.AWSRegion,
-
-		StorageRoot: taskConfig.TaskInfo.Storage.ProjectRoot,
+		AWSRegion:      taskConfig.awsRegion(),
+		StorageRoot:    projectRoot,
 	}, nil
 }
